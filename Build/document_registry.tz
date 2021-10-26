@@ -1,0 +1,137 @@
+{ parameter (or (or (address %addAdmin) (bytes %addDocument)) (bytes %verifyDocument)) ;
+  storage
+    (pair (pair (pair (map %admins address bool)
+                      (pair %current_doc_details
+                         (lambda %output unit (list operation))
+                         (timestamp %publish_date)))
+                (pair (map %docs_2_hash_map bytes timestamp) (list %hashes_array bytes)))
+          (nat %no_of_docs_in_reg)) ;
+  code { PUSH address "tz1hx1MnUh1bj9AnFi6BMrCuoXBiZ2p2fG5T" ;
+         SWAP ;
+         UNPAIR ;
+         IF_LEFT
+           { IF_LEFT
+               { DIG 2 ;
+                 SOURCE ;
+                 COMPARE ;
+                 NEQ ;
+                 IF { PUSH string "Only Organization Account is Allowed to add new admins" ;
+                      FAILWITH }
+                    {} ;
+                 SWAP ;
+                 DUP ;
+                 DUG 2 ;
+                 CDR ;
+                 DUP 3 ;
+                 CAR ;
+                 CDR ;
+                 DUP 4 ;
+                 CAR ;
+                 CAR ;
+                 CDR ;
+                 DIG 4 ;
+                 CAR ;
+                 CAR ;
+                 CAR ;
+                 PUSH bool True ;
+                 DIG 5 ;
+                 SWAP ;
+                 SOME ;
+                 SWAP ;
+                 UPDATE ;
+                 PAIR ;
+                 PAIR ;
+                 PAIR ;
+                 NIL operation ;
+                 PAIR }
+               { DIG 2 ;
+                 SOURCE ;
+                 COMPARE ;
+                 NEQ ;
+                 IF { PUSH string
+                           "Only Organization Account is Allowed to add documents to the Blockchain" ;
+                      FAILWITH }
+                    {} ;
+                 NOW ;
+                 SWAP ;
+                 KECCAK ;
+                 PUSH int 1 ;
+                 DUP 4 ;
+                 CDR ;
+                 ADD ;
+                 ABS ;
+                 DUP 4 ;
+                 CAR ;
+                 CDR ;
+                 CDR ;
+                 DUP 5 ;
+                 CAR ;
+                 CDR ;
+                 CAR ;
+                 DIG 4 ;
+                 DUP 5 ;
+                 SWAP ;
+                 SOME ;
+                 SWAP ;
+                 UPDATE ;
+                 PAIR ;
+                 DUP 4 ;
+                 CAR ;
+                 CAR ;
+                 PAIR ;
+                 PAIR ;
+                 DUP ;
+                 CDR ;
+                 DIG 3 ;
+                 CAR ;
+                 CDR ;
+                 CDR ;
+                 DIG 3 ;
+                 CONS ;
+                 DUP 3 ;
+                 CAR ;
+                 CDR ;
+                 CAR ;
+                 PAIR ;
+                 DIG 2 ;
+                 CAR ;
+                 CAR ;
+                 PAIR ;
+                 PAIR ;
+                 NIL operation ;
+                 PAIR } }
+           { DIG 2 ;
+             DROP ;
+             SOURCE ;
+             PUSH bool True ;
+             DUP 4 ;
+             CAR ;
+             CAR ;
+             CAR ;
+             DIG 2 ;
+             GET ;
+             IF_NONE { PUSH bool False } {} ;
+             COMPARE ;
+             NEQ ;
+             IF { PUSH mutez 200000 ;
+                  AMOUNT ;
+                  COMPARE ;
+                  LE ;
+                  IF { PUSH string "Sorry Fee not enough for verification" ; FAILWITH } {} ;
+                  PUSH unit Unit }
+                { PUSH unit Unit } ;
+             DROP ;
+             SWAP ;
+             DUP ;
+             DUG 2 ;
+             CAR ;
+             CDR ;
+             CAR ;
+             SWAP ;
+             KECCAK ;
+             GET ;
+             IF_NONE
+               { PUSH string "Document does not exist in chain" ; FAILWITH }
+               { DROP } ;
+             NIL operation ;
+             PAIR } } }
